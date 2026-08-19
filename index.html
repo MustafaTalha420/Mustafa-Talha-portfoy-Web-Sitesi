@@ -1232,25 +1232,31 @@
     const overlay = document.getElementById('introOverlay');
     if (!overlay) return;
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const isMobile = window.matchMedia('(max-width: 640px)').matches;
 
     function dismiss() {
-      overlay.remove();
+      if (!overlay.isConnected) return;
+      overlay.classList.add('fade-out');
       document.documentElement.style.overflow = '';
-      document.dispatchEvent(new CustomEvent('introComplete'));
+      window.setTimeout(() => {
+        if (overlay.isConnected) overlay.remove();
+        document.dispatchEvent(new CustomEvent('introComplete'));
+      }, 550);
     }
 
+    // On mobile, keep the intro brief and never leave the page scroll-locked.
     if (reduceMotion) {
       dismiss();
       return;
     }
+    if (isMobile) {
+      document.documentElement.style.overflow = '';
+      window.setTimeout(dismiss, 850);
+      return;
+    }
 
     document.documentElement.style.overflow = 'hidden';
-
-    setTimeout(() => {
-      overlay.classList.add('fade-out');
-      document.documentElement.style.overflow = '';
-      setTimeout(dismiss, 550);
-    }, 1350);
+    window.setTimeout(dismiss, 1350);
   })();
 </script>
 
@@ -1678,6 +1684,7 @@
   })();
 </script></body>
 </html>
+
 
 
 
